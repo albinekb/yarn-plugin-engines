@@ -1,8 +1,8 @@
-import { readFileSync, existsSync } from "fs";
+import { formatUtils } from "@yarnpkg/core";
+import { npath } from "@yarnpkg/fslib";
+import { existsSync, readFileSync } from "fs";
 import { resolve } from "path";
 import { satisfies, validRange } from "semver";
-import { npath } from "@yarnpkg/fslib";
-import { formatUtils } from "@yarnpkg/core";
 import { EngineChecker } from "./engine-checker";
 
 export class NodeEngineChecker extends EngineChecker {
@@ -19,7 +19,11 @@ export class NodeEngineChecker extends EngineChecker {
       nodeRequiredVersion = this.resolveNvmRequiredVersion();
     }
     if (!satisfies(process.version, nodeRequiredVersion, { includePrerelease: true })) {
-      this.throwWrongEngineError(process.version.replace(/^v/i, ""), nodeRequiredVersion.replace(/^v/i, ""));
+      this.throwWrongEngineError(
+        process.version.replace(/^v/i, ""),
+        nodeRequiredVersion.replace(/^v/i, ""),
+        `Run \`${formatUtils.pretty(this.project.configuration, "nvm use", "bold")}\` to use the correct Node version.`
+      );
     }
   }
 

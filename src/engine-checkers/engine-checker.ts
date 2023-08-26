@@ -1,4 +1,4 @@
-import { ReportError, MessageName, Project, formatUtils } from "@yarnpkg/core";
+import { formatUtils, MessageName, Project, ReportError } from "@yarnpkg/core";
 
 export enum ErrorReporter {
   Yarn = "Yarn",
@@ -20,8 +20,8 @@ export abstract class EngineChecker {
     this.errorReporter = options.errorReporter;
   }
 
-  protected throwWrongEngineError = (currentVersion: string, requiredVersion: string): void => {
-    const message = this.formatErrorMessage(currentVersion, requiredVersion);
+  protected throwWrongEngineError = (currentVersion: string, requiredVersion: string, helpMessage?: string): void => {
+    const message = this.formatErrorMessage(currentVersion, requiredVersion, helpMessage);
     this.throwError(message);
   };
 
@@ -46,7 +46,7 @@ export abstract class EngineChecker {
     process.exit(1);
   };
 
-  protected formatErrorMessage = (currentVersion: string, requiredVersion: string): string => {
+  protected formatErrorMessage = (currentVersion: string, requiredVersion: string, helpMessage?: string): string => {
     const { configuration } = this.project;
     const engineText = formatUtils.applyStyle(
       configuration,
@@ -55,7 +55,12 @@ export abstract class EngineChecker {
     );
     const currentVersionText = formatUtils.pretty(configuration, currentVersion, "cyan");
     const requiredVersionText = formatUtils.pretty(configuration, requiredVersion, "cyan");
-    const message = `The current ${engineText} version ${currentVersionText} does not satisfy the required version ${requiredVersionText}.`;
+
+    let message = `The current ${engineText} version ${currentVersionText} does not satisfy the required version ${requiredVersionText}.`;
+    if (helpMessage) {
+      message += ` ${formatUtils.pretty(configuration, helpMessage, "yellow")}`;
+    }
+
     return formatUtils.pretty(configuration, message, "red");
   };
 
